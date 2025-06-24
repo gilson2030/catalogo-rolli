@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Catálogo Rolli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #f6f7fb;
+      font-family: 'Inter', Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .banner {
+      background: #4824c6;
+      color: #ffd600;
+      font-size: 2rem;
+      text-align: center;
+      padding: 18px 0 10px;
+      font-weight: bold;
+      letter-spacing: .5px;
+    }
+    .catalogo-container {
+      background: #fff;
+      margin: 40px auto 0;
+      max-width: 700px;
+      border-radius: 22px;
+      box-shadow: 0 4px 20px rgba(80,80,120,0.07);
+      padding: 32px 16px 32px 16px;
+    }
+    h1 {
+      color: #4824c6;
+      text-align: center;
+      font-size: 2.6rem;
+      margin-bottom: 24px;
+      font-weight: bold;
+    }
+    .categorias {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+    .categoria-btn {
+      background: #eee;
+      color: #4824c6;
+      border: none;
+      border-radius: 18px;
+      font-size: 1rem;
+      padding: 7px 18px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.18s;
+    }
+    .categoria-btn.active {
+      background: #4824c6;
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(76, 0, 209, 0.11);
+    }
+    .search-bar {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+    .search-bar input {
+      width: 360px;
+      max-width: 90vw;
+      border-radius: 22px;
+      border: 1.5px solid #d4d4e0;
+      padding: 11px 18px;
+      font-size: 1.12rem;
+      outline: none;
+      transition: 0.16s;
+    }
+    .produtos-lista {
+      margin-top: 16px;
+      min-height: 200px;
+      padding-bottom: 8px;
+    }
+    .produto-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 2px 12px rgba(80,80,120,0.07);
+      margin: 18px auto;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 22px;
+      max-width: 520px;
+      transition: box-shadow .17s;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .produto-card:hover {
+      border-color: #b4adff;
+      box-shadow: 0 4px 20px rgba(80,80,150,0.13);
+    }
+    .produto-card img {
+      width: 92px;
+      height: 92px;
+      object-fit: cover;
+      border-radius: 16px;
+      background: #f2f2f2;
+      box-shadow: 0 2px 10px rgba(80,80,120,0.04);
+      border: 1.5px solid #ececec;
+    }
+    .produto-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .produto-info h2 {
+      font-size: 1.22rem;
+      margin: 0 0 2px;
+      color: #4824c6;
+      font-weight: 700;
+    }
+    .produto-info .categoria {
+      color: #888;
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+    .produto-info .preco {
+      color: #25d366;
+      font-weight: bold;
+      font-size: 1.15rem;
+      margin: 6px 0 4px 0;
+    }
+    .produto-info .desc {
+      color: #222;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 270px;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 0.92em;
+      padding: 2px 10px;
+      border-radius: 11px;
+      margin-right: 5px;
+      background: #ffd600;
+      color: #4824c6;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .tag.promocao {
+      background: #7c3aed;
+      color: #fff;
+    }
+    .tag.destaque {
+      background: #ffb300;
+      color: #fff;
+    }
+    /* MODAL */
+    .modal-bg {
+      position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(60,60,80,0.26);
+      display: none; justify-content: center; align-items: center;
+      z-index: 999;
+    }
+    .modal-bg.active {
+      display: flex;
+    }
+    .modal-produto {
+      background: #fff;
+      border-radius: 26px;
+      max-width: 400px;
+      width: 94vw;
+      box-shadow: 0 6px 32px rgba(40,0,90,0.18);
+      padding: 30px 22px 22px 22px;
+      position: relative;
+      text-align: center;
+      animation: modalshow 0.2s;
+    }
+    @keyframes modalshow {
+      0% { transform: translateY(40px) scale(0.95); opacity: 0.1;}
+      100% { transform: translateY(0) scale(1); opacity: 1;}
+    }
+    .modal-produto img {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 22px;
+      margin-bottom: 12px;
+      background: #f6f6fa;
+      border: 2px solid #ececec;
+    }
+    .modal-produto .fechar-modal {
+      position: absolute; right: 16px; top: 8px; font-size: 2rem; color: #bbb;
+      cursor: pointer; background: none; border: none;
+    }
+    .modal-produto .preco {
+      font-size: 1.35rem;
+      color: #25d366;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .btn-modal-whats {
+      background: #25d366;
+      color: #fff;
+      padding: 14px 0;
+      border: none;
+      border-radius: 22px;
+      font-size: 1.17rem;
+      font-weight: bold;
+      margin: 15px 0 0 0;
+      width: 100%;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 2px 14px rgba(0,200,70,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    .btn-modal-whats:hover {
+      background: #22c35b;
+    }
+    /* Botão WhatsApp Fixo */
+    .whatsapp-fixo {
+      position: fixed;
+      right: 22px;
+      bottom: 24px;
+      z-index: 99999;
+      background: #25d366;
+      color: #fff;
+      padding: 14px 22px 14px 18px;
+      border-radius: 44px;
+      font-weight: bold;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.17);
+      text-decoration: none;
+      font-size: 1.18rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background .16s;
+    }
+    .whatsapp-fixo:hover { background: #20ba54; }
+    .whatsapp-fixo img { filter: invert(1); }
+    /* Rodapé */
+    footer {
+      text-align:center; padding:30px 0 14px 0; color:#888; font-size: 1rem; margin-top: 40px;
+    }
+    @media (max-width: 600px) {
+      .catalogo-container { padding: 13px 3vw 18px 3vw; }
+      .produto-card { padding: 12px 8px; gap: 8px; }
+      .produto-card img { width: 64px; height: 64px;}
+      h1 { font-size: 2.1rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    🎉 Promoção de Lançamento! Aproveite ofertas especiais na Rolli! 🎉
+  </div>
+  <div class="catalogo-container">
+    <h1>Catálogo Rolli</h1>
+    <div class="categorias" id="categorias">
+      <!-- categorias são inseridas pelo JS -->
+    </div>
+    <div class="search-bar">
+      <input id="search" type="text" placeholder="Buscar produto...">
+    </div>
+    <div class="produtos-lista" id="produtos-lista">
+      <p>Carregando produtos...</p>
+    </div>
+  </div>
+  <!-- Modal de Detalhe do Produto -->
+  <div class="modal-bg" id="modal-bg">
+    <div class="modal-produto" id="modal-produto">
+      <button class="fechar-modal" onclick="fecharModal()">&times;</button>
+      <img id="modal-img" src="" alt="">
+      <h2 id="modal-nome"></h2>
+      <div class="categoria" id="modal-categoria"></div>
+      <div class="preco" id="modal-preco"></div>
+      <div class="desc" id="modal-desc"></div>
+      <div id="modal-tags"></div>
+      <button class="btn-modal-whats" id="btn-modal-whats">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="22" style="vertical-align: middle;">
+        Pedir no WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- Botão WhatsApp fixo -->
+  <a href="https://wa.me/5565993351706?text=Olá!%20Quero%20fazer%20um%20pedido%20do%20catálogo%20Rolli." class="whatsapp-fixo" target="_blank" rel="noopener">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="24" style="vertical-align:middle;">
+    Atendimento
+  </a>
+
+  <!-- Rodapé -->
+  <footer>
+    <b>Rolli Loja</b> &middot; Produtos originais e novidades toda semana. <br>
+    WhatsApp: <a href="https://wa.me/5565993351706" style="color:#25d366;text-decoration:underline" target="_blank">65 99335-1706</a>
+    <br>
+    <small>&copy; 2025 Rolli | Catálogo digital inspirado no Goomer</small>
+  </footer>
+
+  <!-- INÍCIO DO SCRIPT JS -->
+  <script type="module">
+    // Firebase (só leitura)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Config Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCKWVJAOveA4N-Y5CbbJKUVJMPRRHS5vaE",
+      authDomain: "catalogo-rolli-acbb1.firebaseapp.com",
+      projectId: "catalogo-rolli-acbb1",
+      storageBucket: "catalogo-rolli-acbb1.appspot.com",
+      messagingSenderId: "986465468536",
+      appId: "1:986465468536:web:50ce79f10385317b032d8d"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Categorias
+    const categorias = [
+      {nome:"Todos",icone:"📋"},
+      {nome:"Óculos",icone:"👓"},
+      {nome:"Relógio",icone:"⌚"},
+      {nome:"Fone",icone:"🎧"},
+      {nome:"Carteira",icone:"💼"},
+      {nome:"Bolsas",icone:"👜"},
+      {nome:"Calçados",icone:"👟"},
+      {nome:"Roupas",icone:"👕"},
+      {nome:"Lanternas",icone:"🔦"},
+      {nome:"Informática",icone:"💻"},
+      {nome:"Outros",icone:"🎁"}
+    ];
+    // Monta botoes de categoria
+    const catDiv = document.getElementById('categorias');
+    categorias.forEach((cat, i) => {
+      const btn = document.createElement('button');
+      btn.className = "categoria-btn" + (i === 0 ? " active" : "");
+      btn.textContent = `${cat.icone} ${cat.nome}`;
+      btn.onclick = () => filtrarCategoria(cat.nome, btn);
+      catDiv.appendChild(btn);
+    });
+    let categoriaAtiva = "Todos";
+    // Filtra por categoria
+    function filtrarCategoria(nome, btn) {
+      categoriaAtiva = nome;
+      document.querySelectorAll('.categoria-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderizarProdutos();
+    }
+
+    // Busca
+    const searchInput = document.getElementById('search');
+    searchInput.addEventListener('input', renderizarProdutos);
+
+    // Busca e renderiza produtos
+    let produtos = [];
+    async function carregarProdutos() {
+      const snap = await getDocs(collection(db, "produtos"));
+      produtos = [];
+      snap.forEach(doc => produtos.push({...doc.data(), id: doc.id}));
+      renderizarProdutos();
+    }
+
+    // Renderiza a lista de produtos
+    function renderizarProdutos() {
+      const lista = document.getElementById('produtos-lista');
+      let busca = searchInput.value.trim().toLowerCase();
+      let filtrados = produtos.filter(p => {
+        let catOK = categoriaAtiva === "Todos" || (p.categoria && p.categoria.toLowerCase() === categoriaAtiva.toLowerCase());
+        let buscaOK = !busca || (p.nome && p.nome.toLowerCase().includes(busca));
+        return catOK && buscaOK;
+      });
+      if (filtrados.length === 0) {
+        lista.innerHTML = `<p style="color:#888;text-align:center;font-size:1.13rem">Nenhum produto encontrado.</p>`;
+        return;
+      }
+      lista.innerHTML = "";
+      filtrados.forEach(p => {
+        lista.innerHTML += `
+          <div class="produto-card" onclick="window.abrirModal('${p.id}')">
+            <img src="${p.imagem || 'https://via.placeholder.com/120?text=Sem+Imagem'}" alt="${p.nome||''}">
+            <div class="produto-info">
+              <h2>${p.nome||''}</h2>
+              <div class="categoria">${p.categoria||''}</div>
+              <div class="preco">R$ ${p.preco||''}</div>
+              <div class="desc">${p.descricao||''}</div>
+              ${(p.destaque ? `<span class="tag destaque">Destaque</span>` : "")}
+              ${(p.promocao ? `<span class="tag promocao">Promoção</span>` : "")}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Modal de detalhe
+    window.abrirModal = function(id) {
+      const p = produtos.find(pr => pr.id === id);
+      if (!p) return;
+      document.getElementById('modal-img').src = p.imagem || 'https://via.placeholder.com/140x120?text=Sem+Imagem';
+      document.getElementById('modal-nome').textContent = p.nome || '';
+      document.getElementById('modal-categoria').textContent = p.categoria || '';
+      document.getElementById('modal-preco').textContent = p.preco ? "R$ " + p.preco : "";
+      document.getElementById('modal-desc').textContent = p.descricao || '';
+      // Tags
+      let tags = '';
+      if (p.destaque) tags += `<span class="tag destaque">Destaque</span>`;
+      if (p.promocao) tags += `<span class="tag promocao">Promoção</span>`;
+      document.getElementById('modal-tags').innerHTML = tags;
+      // Botão WhatsApp
+      const msg = encodeURIComponent(`Olá! Tenho interesse no produto ${p.nome || ""} da Rolli.`);
+      document.getElementById('btn-modal-whats').onclick = () => {
+        window.open(`https://wa.me/5565993351706?text=${msg}`, "_blank");
+      };
+      document.getElementById('modal-bg').classList.add('active');
+    };
+
+    window.fecharModal = function() {
+      document.getElementById('modal-bg').classList.remove('active');
+    };
+
+    // Fecha modal ao clicar fora ou apertar ESC
+    document.getElementById('modal-bg').onclick = function(e) {
+      if (e.target.id === 'modal-bg') fecharModal();
+    };
+    document.addEventListener('keydown', e => {
+      if (e.key === "Escape") fecharModal();
+    });
+
+    // Carrega produtos ao abrir a página
+    carregarProdutos();
+  </script>
+</body>
+</html>
