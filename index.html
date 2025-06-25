@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo Rolli</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Banner Personalizável -->
+  <header id="banner-area" style="background: #4f21d9;">
+    <img id="banner-img" src="" alt="Banner Rolli" style="display:none; max-height: 120px;">
+    <div id="banner-text" style="font-size:2rem; color:#fff; font-weight:600; padding: 10px 0;">
+      <!-- Texto do banner será carregado via JS -->
+    </div>
+  </header>
+  
+  <!-- Logo e Nome da Loja -->
+  <section id="topo-catalogo" style="text-align:center; margin: 2rem 0 1rem 0;">
+    <img id="logo-img" src="" alt="Logo Rolli" style="height:72px; max-width:180px; border-radius: 16px; margin-bottom:8px; display:none;">
+    <h1 id="nome-loja" style="font-size:2.5rem; font-weight:700;">Catálogo Rolli</h1>
+  </section>
+
+  <!-- Categorias -->
+  <nav id="categorias-area" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:1.5rem;">
+    <!-- Categorias serão geradas dinamicamente -->
+  </nav>
+
+  <!-- Busca -->
+  <div style="display:flex; justify-content:center; margin-bottom:1.5rem;">
+    <input id="busca-produto" type="text" placeholder="Buscar produto..." style="width: 350px; max-width: 90%; padding:12px; font-size:1rem; border-radius: 12px; border:1.5px solid #ddd;">
+  </div>
+
+  <!-- Lista de Produtos -->
+  <section id="produtos-lista" style="max-width:700px; margin: 0 auto 3rem auto;">
+    <!-- Produtos aparecem aqui via JS -->
+  </section>
+
+  <!-- Botão WhatsApp flutuante -->
+  <a id="whatsapp-btn" href="https://wa.me/5565993351706" target="_blank" 
+     style="position:fixed; bottom:24px; right:24px; background:#26d367; color:#fff; font-weight:600; font-size:1.2rem; border-radius:30px; padding:16px 28px; box-shadow:0 3px 14px #0001; display:flex; align-items:center; gap:10px; z-index:99; text-decoration:none;">
+    <img src="https://cdn-icons-png.flaticon.com/512/124/124034.png" alt="WhatsApp" width="28" height="28" style="margin-right:6px;"> Atendimento
+  </a>
+
+  <!-- Rodapé -->
+  <footer style="text-align:center; padding:2rem 0 1rem 0; color:#888;">
+    <div style="font-weight:600;">Novidades toda semana.</div>
+  </footer>
+
+  <!-- SCRIPTS DO FIREBASE E JS do catálogo serão adicionados na PARTE 2 -->
+  <script src="catalogo.js"></script>
+</body>
+</html>
