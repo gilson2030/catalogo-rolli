@@ -1,141 +1,90 @@
-// --- Firebase Configuração ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// ----------- Configurações iniciais --------------
 
-// --- Config do seu Firebase ---
-const firebaseConfig = {
-  apiKey: "AIzaSyCKWVJAOveA4N-Y5CbbJKUVJMPRRHS5vaE",
-  authDomain: "catalogo-rolli-acbb1.firebaseapp.com",
-  projectId: "catalogo-rolli-acbb1",
-  storageBucket: "catalogo-rolli-acbb1.appspot.com",
-  messagingSenderId: "986465468536",
-  appId: "1:986465468536:web:50ce79f10385317b032d8d"
-};
+// Categorias e ícones (pode editar/adicionar)
+const categorias = [
+  { nome: "Todos", icon: "🗒️" },
+  { nome: "Óculos", icon: "👓" },
+  { nome: "Relógio", icon: "⌚" },
+  { nome: "Fone", icon: "🎧" },
+  { nome: "Carteira", icon: "💼" },
+  { nome: "Bolsas", icon: "👜" },
+  { nome: "Calçados", icon: "👟" },
+  { nome: "Roupas", icon: "👕" },
+  { nome: "Lanternas", icon: "🔦" },
+  { nome: "Informática", icon: "💻" },
+  { nome: "Outros", icon: "🎁" }
+];
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// --- Carregar Banner, Logo, Nome da Loja, Categorias ---
-async function carregarConfigLoja() {
-  // Pega a collection "config"
-  const snap = await getDocs(collection(db, "config"));
-  let config = {};
-  snap.forEach(doc => config = doc.data());
-
-  // Banner (imagem e texto)
-  if(config.bannerUrl) {
-    document.getElementById('banner-img').src = config.bannerUrl;
-    document.getElementById('banner-img').style.display = "block";
+// Exemplo de produtos (depois pode trazer do Firebase)
+const produtos = [
+  {
+    nome: "Oculos",
+    categoria: "Óculos",
+    preco: 99.90,
+    descricao: "black",
+    imagem: "https://placehold.co/120x120?text=Oculos",
+    destaque: false,
+    promocao: false
   }
-  if(config.bannerText) {
-    document.getElementById('banner-text').textContent = config.bannerText;
-  } else {
-    document.getElementById('banner-text').textContent = "Promoção de Lançamento! Aproveite ofertas especiais na Rolli!";
-  }
-  if(config.bannerColor) {
-    document.getElementById('banner-area').style.background = config.bannerColor;
-  }
+  // Adicione outros produtos do Firebase
+];
 
-  // Logo
-  if(config.logoUrl) {
-    document.getElementById('logo-img').src = config.logoUrl;
-    document.getElementById('logo-img').style.display = "inline-block";
-  }
+// ----------- Renderizar categorias --------------
+const categoriasDiv = document.getElementById('categorias');
+let categoriaAtual = "Todos";
 
-  // Nome da loja
-  if(config.nomeLoja) {
-    document.getElementById('nome-loja').textContent = config.nomeLoja;
-  }
-
-  // Categorias
-  const categorias = config.categorias || [
-    "Óculos", "Relógio", "Fone", "Carteira", "Bolsas", "Calçados", "Roupas", "Lanternas", "Informática", "Outros"
-  ];
-  montarCategorias(categorias);
-}
-
-function montarCategorias(lista) {
-  const area = document.getElementById('categorias-area');
-  area.innerHTML = '';
-  area.innerHTML += `<button class="cat-btn active" data-cat="Todos">📋 Todos</button>`;
-  lista.forEach(cat => {
-    let emoji = "📦";
-    switch(cat.toLowerCase()) {
-      case "óculos": emoji = "👓"; break;
-      case "relógio": emoji = "⌚"; break;
-      case "fone": emoji = "🎧"; break;
-      case "carteira": emoji = "💼"; break;
-      case "bolsas": emoji = "👜"; break;
-      case "calçados": emoji = "👟"; break;
-      case "roupas": emoji = "👕"; break;
-      case "lanternas": emoji = "🔦"; break;
-      case "informática": emoji = "💻"; break;
-      case "outros": emoji = "🎁"; break;
-    }
-    area.innerHTML += `<button class="cat-btn" data-cat="${cat}">${emoji} ${cat}</button>`;
-  });
-  // Evento click
-  Array.from(document.querySelectorAll('.cat-btn')).forEach(btn => {
+function renderCategorias() {
+  categoriasDiv.innerHTML = '';
+  categorias.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = "categoria-btn" + (cat.nome === categoriaAtual ? " ativa" : "");
+    btn.innerHTML = `${cat.icon} ${cat.nome}`;
     btn.onclick = () => {
-      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      carregarProdutos(btn.dataset.cat);
+      categoriaAtual = cat.nome;
+      renderCategorias();
+      renderProdutos();
     };
+    categoriasDiv.appendChild(btn);
   });
 }
 
-// --- Carregar Produtos ---
-async function carregarProdutos(categoriaFiltro = "Todos") {
-  const lista = document.getElementById('produtos-lista');
-  lista.innerHTML = "Carregando...";
-  const snap = await getDocs(collection(db, "produtos"));
-  let html = "";
-  snap.forEach(doc => {
-    const p = doc.data();
-    if(categoriaFiltro === "Todos" || p.categoria === categoriaFiltro) {
-      html += `
-      <div class="produto-catalogo">
-        <img src="${p.imagem}" alt="${p.nome}" class="produto-img">
-        <div class="produto-info">
-          <h2>${p.nome}</h2>
-          <div class="prod-cat">${p.categoria || ""}</div>
-          <div class="prod-preco">R$ ${Number(p.preco).toFixed(2).replace('.',',')}</div>
-          <div class="prod-desc">${p.descricao || ""}</div>
-        </div>
+// ----------- Busca produtos --------------
+const buscaInput = document.getElementById('busca');
+buscaInput.oninput = renderProdutos;
+
+// ----------- Renderizar produtos --------------
+const listaDiv = document.getElementById('produtos-lista');
+
+function renderProdutos() {
+  const busca = buscaInput.value.toLowerCase();
+  let filtrados = produtos.filter(prod =>
+    (categoriaAtual === "Todos" || prod.categoria === categoriaAtual) &&
+    (
+      prod.nome.toLowerCase().includes(busca) ||
+      prod.descricao?.toLowerCase().includes(busca) ||
+      prod.categoria.toLowerCase().includes(busca)
+    )
+  );
+  if (filtrados.length === 0) {
+    listaDiv.innerHTML = "<p style='text-align:center;color:#888'>Nenhum produto encontrado.</p>";
+    return;
+  }
+  listaDiv.innerHTML = filtrados.map(prod => `
+    <div class="produto-card">
+      <img src="${prod.imagem}" alt="${prod.nome}">
+      <div class="produto-info">
+        <div class="produto-nome">${prod.nome}</div>
+        <div class="produto-categoria">${prod.categoria}</div>
+        <div class="produto-preco">R$ ${prod.preco.toFixed(2).replace('.', ',')}</div>
+        <div class="produto-desc">${prod.descricao || ''}</div>
+        ${prod.destaque ? `<span class="produto-destaque">★ Destaque</span>` : ""}
+        ${prod.promocao ? `<span class="produto-promocao">Promoção</span>` : ""}
       </div>
-      `;
-    }
-  });
-  lista.innerHTML = html || "<p style='text-align:center'>Nenhum produto cadastrado.</p>";
+    </div>
+  `).join('');
 }
 
-// --- Busca ---
-document.getElementById('busca-produto').addEventListener('input', async function() {
-  const termo = this.value.trim().toLowerCase();
-  const lista = document.getElementById('produtos-lista');
-  lista.innerHTML = "Buscando...";
-  const snap = await getDocs(collection(db, "produtos"));
-  let html = "";
-  snap.forEach(doc => {
-    const p = doc.data();
-    const busca = (p.nome + " " + (p.categoria || "") + " " + (p.descricao || "")).toLowerCase();
-    if(busca.includes(termo)) {
-      html += `
-      <div class="produto-catalogo">
-        <img src="${p.imagem}" alt="${p.nome}" class="produto-img">
-        <div class="produto-info">
-          <h2>${p.nome}</h2>
-          <div class="prod-cat">${p.categoria || ""}</div>
-          <div class="prod-preco">R$ ${Number(p.preco).toFixed(2).replace('.',',')}</div>
-          <div class="prod-desc">${p.descricao || ""}</div>
-        </div>
-      </div>
-      `;
-    }
-  });
-  lista.innerHTML = html || "<p style='text-align:center'>Nenhum produto encontrado.</p>";
-});
+// ----------- Inicialização --------------
+renderCategorias();
+renderProdutos();
 
-// --- Inicializar tudo ---
-carregarConfigLoja();
-carregarProdutos("Todos");
