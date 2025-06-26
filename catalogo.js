@@ -1,6 +1,19 @@
-// ----------- Configurações iniciais --------------
+// 1. Configurar Firebase (adicione suas chaves abaixo)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Categorias e ícones (pode editar/adicionar)
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_STORAGE_BUCKET",
+  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+  appId: "SEU_APP_ID"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 2. Categorias e ícones
 const categorias = [
   { nome: "Todos", icon: "🗒️" },
   { nome: "Óculos", icon: "👓" },
@@ -15,24 +28,9 @@ const categorias = [
   { nome: "Outros", icon: "🎁" }
 ];
 
-// Exemplo de produtos (depois pode trazer do Firebase)
-const produtos = [
-  {
-    nome: "Oculos",
-    categoria: "Óculos",
-    preco: 99.90,
-    descricao: "black",
-    imagem: "https://placehold.co/120x120?text=Oculos",
-    destaque: false,
-    promocao: false
-  }
-  // Adicione outros produtos do Firebase
-];
-
-// ----------- Renderizar categorias --------------
+// 3. Renderizar categorias
 const categoriasDiv = document.getElementById('categorias');
 let categoriaAtual = "Todos";
-
 function renderCategorias() {
   categoriasDiv.innerHTML = '';
   categorias.forEach(cat => {
@@ -48,21 +46,33 @@ function renderCategorias() {
   });
 }
 
-// ----------- Busca produtos --------------
+// 4. Busca produtos
 const buscaInput = document.getElementById('busca');
 buscaInput.oninput = renderProdutos;
 
-// ----------- Renderizar produtos --------------
-const listaDiv = document.getElementById('produtos-lista');
+// 5. Variável global para armazenar os produtos vindos do Firestore
+let produtos = [];
 
+// 6. Buscar produtos no Firestore
+async function buscarProdutosFirestore() {
+  produtos = [];
+  const snap = await getDocs(collection(db, "produtos"));
+  snap.forEach(docu => {
+    produtos.push(docu.data());
+  });
+  renderProdutos();
+}
+
+// 7. Renderizar produtos
+const listaDiv = document.getElementById('produtos-lista');
 function renderProdutos() {
   const busca = buscaInput.value.toLowerCase();
   let filtrados = produtos.filter(prod =>
     (categoriaAtual === "Todos" || prod.categoria === categoriaAtual) &&
     (
-      prod.nome.toLowerCase().includes(busca) ||
+      prod.nome?.toLowerCase().includes(busca) ||
       prod.descricao?.toLowerCase().includes(busca) ||
-      prod.categoria.toLowerCase().includes(busca)
+      prod.categoria?.toLowerCase().includes(busca)
     )
   );
   if (filtrados.length === 0) {
@@ -75,7 +85,7 @@ function renderProdutos() {
       <div class="produto-info">
         <div class="produto-nome">${prod.nome}</div>
         <div class="produto-categoria">${prod.categoria}</div>
-        <div class="produto-preco">R$ ${prod.preco.toFixed(2).replace('.', ',')}</div>
+        <div class="produto-preco">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</div>
         <div class="produto-desc">${prod.descricao || ''}</div>
         ${prod.destaque ? `<span class="produto-destaque">★ Destaque</span>` : ""}
         ${prod.promocao ? `<span class="produto-promocao">Promoção</span>` : ""}
@@ -84,7 +94,8 @@ function renderProdutos() {
   `).join('');
 }
 
-// ----------- Inicialização --------------
+// 8. Inicialização
 renderCategorias();
-renderProdutos();
+buscarProdutosFirestore();
+
 
